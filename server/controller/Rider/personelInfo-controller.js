@@ -1,0 +1,101 @@
+const cloudinary = require('cloudinary').v2;
+const Rider = require('../../model/Rider/personelInfo-model');
+const { Business, Branch } = require('../../model/Branch Owner/business-model');
+const Salesperson = require('../../model/Branch Owner/salesperson-model');
+
+
+async function addRiderDetails(req, res){
+    try {
+        const { fullName, contactNumber, city, bikeNumber, cnicNumber, userId } = req.body;
+        const files = req.files;
+    
+        if (!files || !files.cnicFront || !files.cnicBack || !files.bikeDocuments) {
+          return res.status(400).json({ message: "All required image fields must be uploaded." });
+        }
+    
+        // Upload images to Cloudinary
+        const uploadToCloudinary = async (file) => {
+          const result = await cloudinary.uploader.upload(file.path);
+          return result.url;
+        };
+
+        console.log("Image",uploadToCloudinary)
+    
+        const cnicFrontUrl = await uploadToCloudinary(files.cnicFront[0]);
+        const cnicBackUrl = await uploadToCloudinary(files.cnicBack[0]);
+        const bikeDocsUrl = await uploadToCloudinary(files.bikeDocuments[0]);
+
+        console.log("Image",bikeDocsUrl)
+    
+        // Create new rider entry
+        const newRider = new Rider({
+          riderId: userId, 
+          name: fullName,
+          contactNo: contactNumber,
+          CNIC: cnicNumber,
+          city,
+          bikeNo: bikeNumber,
+          CNICFrontPath: cnicFrontUrl,
+          CNICBackPath: cnicBackUrl,
+          motorCycleDocPath: bikeDocsUrl,
+          isApproved: false // Default approval
+        });
+    
+        // Save to the database
+        const savedRider = await newRider.save();
+    
+        res.status(201).json({ message: 'Rider added successfully', data: savedRider });
+    
+    } catch (error) {
+        console.error("Error adding rider:", error);
+        res.status(500).json({ message: "Error adding rider", error: error.message });
+    }
+}
+
+async function listOfSalesperson(req, res){
+    try {
+        const { riderId } = req.query;
+    
+        // Step 1: Get Rider and their city
+        const rider = await Rider.findOne({riderId});
+        if (!rider) {
+          return res.status(404).json({ message: 'Rider not found' });
+        }
+    
+        const riderCity = rider.city;
+    
+        // Step 2: Find branches in the same city
+        const branches = await Branch.find({ city: riderCity }).lean(); // Use .lean() for plain JS objects
+    
+        // Step 3: For each branch, attach salesperson details if exists
+        const enrichedBranches = await Promise.all(
+          branches.map(async (branch) => {
+            if (branch.salesperson) {
+              const salesperson = await Salesperson.findById(branch.salesperson).lean();
+              if (salesperson) {
+                const business = await Business.findById(salesperson.business).lean();
+                if (business) {
+                  salesperson.business = {
+                    _id: business._id,
+                    name: business.name,
+                  };
+                }
+                branch.salespersonDetails = salesperson;
+              }
+            }
+            return branch;
+          })
+        );
+    
+        res.status(200).json({ branches: enrichedBranches });
+    } catch (error) {
+        console.error('Error fetching branches and salesperson:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+}
+
+
+module.exports = {
+    addRiderDetails: addRiderDetails,
+    listOfSalesperson: listOfSalesperson
+}
