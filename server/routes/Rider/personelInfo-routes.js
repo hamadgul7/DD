@@ -3,6 +3,7 @@ const multer = require('multer');
 const riderController = require('../../controller/Rider/personelInfo-controller');
 const verifyToken = require('../../middleware/authMiddleware');
 
+
 const router = express.Router();
 
 // Set up multer storage (temporary local storage for Cloudinary upload)
@@ -22,6 +23,7 @@ router.post('/addRiderDetails', upload.fields([
 ]), riderController.addRiderDetails);
 
 router.get('/listOfSalesperson', riderController.listOfSalesperson);
+router.get('/riderOrdersById', riderController.riderOrdersById);
 
 
 

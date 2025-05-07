@@ -1,6 +1,7 @@
 const Cart = require('../../model/Customer/cart-model');
 const User = require('../../model/auth-model');
 const CartSummary = require('../../model/Customer/cartSummary-model');
+const mongoose = require('mongoose')
 
 async function viewCart(req, res) {
     const { userId } = req.query;
@@ -100,14 +101,14 @@ async function createDiscountSummary(req, res){
 }
 
 async function viewDiscountSummary(req, res) {
-    const { userId } = req.query;
-
+    const userId = req.query.userId;
+    
     if (!userId) {
         return res.status(400).json({ error: "userId is required" });
     }
 
     try {
-        const cartSummary = await CartSummary.findOne({ userId });
+        const cartSummary = await CartSummary.findOne({userId:userId});
 
         if (!cartSummary) {
         return res.status(404).json({ message: "Cart summary not found" });

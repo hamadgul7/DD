@@ -15,4 +15,5 @@ const cartSummarySchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-module.exports = mongoose.model('CartSummary', cartSummarySchema);
+const CartSummary = mongoose.model('CartSummary', cartSummarySchema);
+module.exports = CartSummary

@@ -7,12 +7,14 @@ const BranchProduct = require('../model/Branch Owner/branchProduct-model');
 const UserPoints = require('../model/Customer/loyaltyPoints-model');
 const User = require('../model/auth-model');
 const { Achievement, Mission } = require('../model/achievementAndMissions-model');
+const mongoose = require('mongoose');
+const CartSummary = require('../model/Customer/cartSummary-model');
 
 
 async function addOrderDetails(req, res) {
 // working fully with mission, achievements and without mail
-    const { data, cartItems, orderType, shippingCost } = req.body;
-    console.log("CartItems Details", cartItems);
+    const { data, cartItems, orderType, shippingCost, discountData, totalAmount } = req.body;
+    console.log(req.body);
 
     try {
         const userId = cartItems.find(item => item.userId)?.userId;
@@ -91,8 +93,10 @@ async function addOrderDetails(req, res) {
                 await product.save(); 
             }
 
-            const subTotal = items.reduce((total, item) => total + (item.productId.price * item.quantity), 0);
-            const totalAmount = subTotal + shippingCost;
+            // const subTotal = items.reduce((total, item) => total + (item.productId.price * item.quantity), 0);
+            // const totalAmount = subTotal + shippingCost;
+            
+            const subTotal = totalAmount - shippingCost;
 
             const orderData = {
                 businessId,
@@ -104,7 +108,8 @@ async function addOrderDetails(req, res) {
                 orderType: orderType,
                 subTotal,
                 shippingCost,
-                totalAmount
+                totalAmount,
+                discountData
             };
 
             const order = new Order(orderData);
@@ -659,8 +664,8 @@ async function addOrderDetails(req, res) {
 
 
 
-    //with mail and points 
-    // const { data, cartItems, orderType, shippingCost } = req.body;
+    //final fully working with mail and points 
+    // const { data, cartItems, orderType, shippingCost, discountData, totalAmount } = req.body;
     // try {
     //     const userId = cartItems.find(item => item.userId)?.userId;
     //     if (!userId) {
@@ -737,8 +742,9 @@ async function addOrderDetails(req, res) {
     //             await product.save();
     //         }
 
-    //         const subTotal = items.reduce((total, item) => total + (item.productId.price * item.quantity), 0);
-    //         const totalAmount = subTotal + shippingCost;
+    //         // const subTotal = items.reduce((total, item) => total + (item.productId.price * item.quantity), 0);
+    //         // const totalAmount = subTotal + shippingCost;
+    //          const subTotal = totalAmount - shippingCost;
 
     //         const orderData = {
     //             businessId,
@@ -750,7 +756,8 @@ async function addOrderDetails(req, res) {
     //             orderType,
     //             subTotal,
     //             shippingCost,
-    //             totalAmount
+    //             totalAmount,
+    //             discountData
     //         };
 
     //         const order = new Order(orderData);
@@ -926,7 +933,7 @@ async function addOrderDetails(req, res) {
     //                     ${item.quantity}
     //                 </td>
     //                 <td style="border:1px solid #ddd; padding:8px; text-align:center;">
-    //                     $${item.productId.price * item.quantity}
+    //                     $${totalAmount}
     //                 </td>
     //             </tr>
     //         `).join("");
@@ -937,7 +944,6 @@ async function addOrderDetails(req, res) {
     //                 <p>Thank you for your order! Here are your order details:</p>
     //                 <h3>Order Summary:</h3>
     //                 <p>Business: ${businessName}</p>
-    //                 <p>Order Total: $${totalAmount}</p>
     //                 <table style="width:100%; border-collapse: collapse;">
     //                     <tr>
     //                         <th style="border:1px solid #ddd; padding:8px;">Product</th>
@@ -1369,6 +1375,36 @@ async function assignOrderToBranch(req, res){
 
 }
 
+async function assignOrderToRider(req, res){
+    const { orderId, riderId } = req.body;
+    console.log("OrderID",orderId)
+    console.log("RiderID",riderId)
+
+    if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(riderId)) {
+        return res.status(400).json({ error: 'Invalid orderId or riderId' });
+    }
+
+    try {
+        // Find and update the order
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+
+        order.riderId = riderId;
+        const orderWithRider = await order.save();
+
+        return res.status(200).json({
+            message: 'Rider assigned successfully',
+            order: orderWithRider,
+        });
+
+    } catch (error) {
+        console.error('Error assigning rider:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
 async function updateOrderStatus(req, res){
     const { orderId, status } = req.body;
     try{
@@ -1411,6 +1447,7 @@ module.exports = {
     getOrders: getOrders,
     getSalespersonOrders, getSalespersonOrders,
     assignOrderToBranch: assignOrderToBranch,
+    assignOrderToRider: assignOrderToRider,
     updateOrderStatus: updateOrderStatus,
     deleteOrder: deleteOrder
 }

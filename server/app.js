@@ -80,8 +80,3 @@ db.connectToDatabase()
     console.log('Failed to Connect to the Database')
     console.log(error);
 })
-
-
-
-
-

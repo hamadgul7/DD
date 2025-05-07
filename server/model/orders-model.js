@@ -97,6 +97,14 @@ const ordersSchema = new mongoose.Schema(
             required: [true, "Total Amount is required"]
         },
 
+        riderId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Rider',
+            default: null
+        },
+
+        discountData: [{ type: mongoose.Schema.Types.Mixed }]
+
     },
     {timestamps: true}
 )

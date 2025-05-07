@@ -2,6 +2,9 @@ const cloudinary = require('cloudinary').v2;
 const Rider = require('../../model/Rider/personelInfo-model');
 const { Business, Branch } = require('../../model/Branch Owner/business-model');
 const Salesperson = require('../../model/Branch Owner/salesperson-model');
+const Order = require('../../model/orders-model');
+const mongoose = require('mongoose');
+const CartSummary = require('../../model/Customer/cartSummary-model')
 
 
 async function addRiderDetails(req, res){
@@ -71,7 +74,8 @@ async function listOfSalesperson(req, res){
         const enrichedBranches = await Promise.all(
           branches.map(async (branch) => {
             if (branch.salesperson) {
-              const salesperson = await Salesperson.findById(branch.salesperson).lean();
+              const salesperson = await User.findOne({assignedBranch: branch.salesperson}).lean();
+
               if (salesperson) {
                 const business = await Business.findById(salesperson.business).lean();
                 if (business) {
@@ -94,8 +98,58 @@ async function listOfSalesperson(req, res){
     }
 }
 
+async function riderOrdersById(req, res){
+  const { riderId }  = req.query;
+  console.log(riderId)
+  if (!mongoose.Types.ObjectId.isValid(riderId)) {
+      return res.status(400).json({ error: 'Invalid riderId' });
+  }
+
+  try {
+      const orders = await Order.find({ riderId })
+          .populate('businessId', 'name') // populate business name
+          .populate('userId', 'firstname lastname') // optionally populate user
+          .lean(); // convert to plain JS objects for easier modification
+
+      // For each order, fetch branch and salesperson details
+      const enrichedOrders = await Promise.all(
+          orders.map(async (order) => {
+              const branch = await Branch.findOne({ branchCode: order.branchCode })
+                  .populate('salesperson', 'name')
+                  .lean();
+
+              return {
+                  ...order,
+                  branch: branch ? {
+                      name: branch.name,
+                      city: branch.city,
+                      address: branch.address,
+                      contactNo: branch.contactNo,
+                      emailAddress: branch.emailAddress,
+                      salesperson: branch.salesperson ? {
+                          _id: branch.salesperson._id,
+                          name: branch.salesperson.name,
+                      } : null
+                  } : null
+              };
+          })
+      );
+
+      if (enrichedOrders.length === 0) {
+          return res.status(404).json({ message: 'No orders found for this rider' });
+      }
+
+      return res.status(200).json({ orders: enrichedOrders });
+  } catch (error) {
+      console.error('Error fetching orders for rider:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+
 
 module.exports = {
     addRiderDetails: addRiderDetails,
-    listOfSalesperson: listOfSalesperson
+    listOfSalesperson: listOfSalesperson,
+    riderOrdersById:  riderOrdersById
 }

@@ -1,6 +1,7 @@
 const Chat = require('../model/chat-model');
 const Rider = require('../model/Rider/personelInfo-model');
 const Salesperson = require('../model/Branch Owner/salesperson-model');
+const User = require('../model/auth-model');
 
 async function createChat(req, res){
     const { firstId, secondId } = req.body;
@@ -16,10 +17,10 @@ async function createChat(req, res){
 
         // Determine user roles and retrieve name + correct ID
         const firstRider = await Rider.findOne({ riderId: firstId });
-        const firstSales = await Salesperson.findById(firstId);
+        const firstSales = await User.findById(firstId);
 
         const secondRider = await Rider.findOne({ riderId: secondId });
-        const secondSales = await Salesperson.findById(secondId);
+        const secondSales = await User.findById(secondId);
 
         const members = [];
 
@@ -32,7 +33,7 @@ async function createChat(req, res){
         } else if (firstSales) {
             members.push({
                 userId: firstSales._id,
-                name: firstSales.name,
+                name: firstSales.firstname + ' ' + firstSales.lastname,
                 role: "salesperson"
             });
         } else {
@@ -48,7 +49,7 @@ async function createChat(req, res){
         } else if (secondSales) {
             members.push({
                 userId: secondSales._id,
-                name: secondSales.name,
+                name: secondSales.firstname + ' ' + secondSales.lastname,
                 role: "salesperson"
             });
         } else {
