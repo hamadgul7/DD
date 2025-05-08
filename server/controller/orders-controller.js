@@ -115,6 +115,24 @@ async function addOrderDetails(req, res) {
             const order = new Order(orderData);
             await order.save();
             createdOrders.push(order);
+            const usedPoints =  discountData.pointsRedeemed;
+            await UserPoints.findOneAndUpdate(
+                { userId },
+                {
+                  $push: {
+                    pointHistory: {
+                      type: "redeem", 
+                      description: "Points redeemed on order",
+                      points: -usedPoints,
+                      date: new Date(),
+                      isExpired: false,
+                      expiresAfterDays: null,
+                      expiryDate: null
+                    }
+                  }
+                },
+                { new: true, runValidators: true }
+              );                   
         }
 
         if(user.role == "Customer") {

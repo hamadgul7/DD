@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const pointHistorySchema = new mongoose.Schema({
-    type: { type: String, required: true }, // e.g., "purchase", "mission", "login"
+    type: { type: String }, // e.g., "purchase", "mission", "login"
     description: { type: String },
     points: { type: Number, required: true },
     date: { type: Date, default: Date.now },
@@ -70,5 +70,5 @@ userPointSchema.pre('save', function(next) {
     );
     next();
 });
-
-module.exports = mongoose.model('UserPoints', userPointSchema);
+const UserPoints = mongoose.model('UserPoints', userPointSchema);
+module.exports = UserPoints; 
