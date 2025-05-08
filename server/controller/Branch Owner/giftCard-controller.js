@@ -107,7 +107,7 @@ async function listGiftCardsWithPagination(req, res){
         const pageNumber = parseInt(pageNo);
         const pageLimit = parseInt(limit);
 
-        if (!business) {
+        if (!businessId) {
         return res.status(404).json({ message: "BusinessId not available" });
         }
 
@@ -146,10 +146,30 @@ async function listGiftCardsWithPagination(req, res){
     }
 }
 
+async function deleteGiftCard(req, res){
+    try {
+        const { giftCardId } = req.query;
+    
+        const deletedGiftCard = await GiftCard.findByIdAndDelete(giftCardId);
+    
+        if (!deletedGiftCard) {
+          return res.status(404).json({ message: 'Gift Card not found' });
+        }
+    
+        res.status(200).json({
+          message: 'Gift Card deleted successfully',
+          data: deletedGiftCard
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting gift card', error: error.message });
+    }
+}
+
 
 module.exports = {
     addGiftCard: addGiftCard,
     viewGiftCardDetails: viewGiftCardDetails,
     updateGiftCardDetails: updateGiftCardDetails,
-    listGiftCardsWithPagination: listGiftCardsWithPagination
+    listGiftCardsWithPagination: listGiftCardsWithPagination,
+    deleteGiftCard: deleteGiftCard
 }

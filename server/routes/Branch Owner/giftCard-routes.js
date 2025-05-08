@@ -15,7 +15,7 @@ const upload = multer({ storage });
 router.post('/addGiftCard', upload.single('imageUrl'), giftCardController.addGiftCard);
 router.get('/viewGiftCardDetails',  giftCardController.viewGiftCardDetails)
 router.post('/updateGiftCardDetails', upload.single('imageUrl'), giftCardController.updateGiftCardDetails);
-router.get('/listBusinessGiftCards', giftCardController.listGiftCardsWithPagination)
-
+router.get('/listBusinessGiftCards', giftCardController.listGiftCardsWithPagination);
+router.post('/deleteGiftCard', giftCardController.deleteGiftCard);
 
 module.exports = router;
