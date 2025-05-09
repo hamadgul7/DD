@@ -115,24 +115,26 @@ async function addOrderDetails(req, res) {
             const order = new Order(orderData);
             await order.save();
             createdOrders.push(order);
-            const usedPoints =  discountData.pointsRedeemed;
-            await UserPoints.findOneAndUpdate(
-                { userId },
-                {
-                  $push: {
-                    pointHistory: {
-                      type: "redeem", 
-                      description: "Points redeemed on order",
-                      points: -usedPoints,
-                      date: new Date(),
-                      isExpired: false,
-                      expiresAfterDays: null,
-                      expiryDate: null
-                    }
-                  }
-                },
-                { new: true, runValidators: true }
-              );                   
+            const usedPoints = Number(discountData.pointsRedeemed);
+            if (!isNaN(usedPoints) && usedPoints > 0) {
+                await UserPoints.findOneAndUpdate(
+                    { userId },
+                    {
+                        $push: {
+                            pointHistory: {
+                                type: "redeem",
+                                description: "Points redeemed on order",
+                                points: -usedPoints,
+                                date: new Date(),
+                                isExpired: false,
+                                expiresAfterDays: null,
+                                expiryDate: null
+                            }
+                        }
+                    },
+                    { new: true, runValidators: true }
+                );
+            }             
         }
 
         if(user.role == "Customer") {
@@ -682,7 +684,7 @@ async function addOrderDetails(req, res) {
 
 
 
-    //final fully working with mail and points 
+    // final fully working with mail and points 
     // const { data, cartItems, orderType, shippingCost, discountData, totalAmount } = req.body;
     // try {
     //     const userId = cartItems.find(item => item.userId)?.userId;
@@ -781,6 +783,26 @@ async function addOrderDetails(req, res) {
     //         const order = new Order(orderData);
     //         await order.save();
     //         createdOrders.push(order);
+    //         const usedPoints = Number(discountData.pointsRedeemed);
+    //         if (!isNaN(usedPoints) && usedPoints > 0) {
+    //             await UserPoints.findOneAndUpdate(
+    //                 { userId },
+    //                 {
+    //                     $push: {
+    //                         pointHistory: {
+    //                             type: "redeem",
+    //                             description: "Points redeemed on order",
+    //                             points: -usedPoints,
+    //                             date: new Date(),
+    //                             isExpired: false,
+    //                             expiresAfterDays: null,
+    //                             expiryDate: null
+    //                         }
+    //                     }
+    //                 },
+    //                 { new: true, runValidators: true }
+    //             );
+    //         }         
 
     //         if(user.role == "Customer") {
     //             let userPoints = await UserPoints.findOne({ userId });

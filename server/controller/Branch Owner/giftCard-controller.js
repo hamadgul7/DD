@@ -145,6 +145,17 @@ async function listGiftCardsWithPagination(req, res){
     }
 }
 
+async function listAllGiftCards(req, res){
+    try {
+        const giftCards = await GiftCard.find(); // Populate entire Business document
+
+        res.status(200).json(giftCards);
+    } catch (err) {
+        console.error('Error fetching gift cards:', err);
+        res.status(500).json({ error: 'Failed to fetch gift cards' });
+    }
+}
+
 async function deleteGiftCard(req, res){
     try {
         const  { giftCardId } = req.body;
@@ -171,5 +182,6 @@ module.exports = {
     viewGiftCardDetails: viewGiftCardDetails,
     updateGiftCardDetails: updateGiftCardDetails,
     listGiftCardsWithPagination: listGiftCardsWithPagination,
+    listAllGiftCards: listAllGiftCards,
     deleteGiftCard: deleteGiftCard
 }

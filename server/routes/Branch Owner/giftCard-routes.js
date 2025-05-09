@@ -16,6 +16,7 @@ router.post('/addGiftCard', upload.single('imageUrl'), giftCardController.addGif
 router.get('/viewGiftCardDetails',  giftCardController.viewGiftCardDetails)
 router.post('/updateGiftCardDetails', upload.single('imageUrl'), giftCardController.updateGiftCardDetails);
 router.get('/listBusinessGiftCards', giftCardController.listGiftCardsWithPagination);
+router.get('/listAllGiftCards', giftCardController.listAllGiftCards);
 router.post('/deleteGiftCard', giftCardController.deleteGiftCard);
 
 module.exports = router;
