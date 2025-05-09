@@ -64,37 +64,36 @@ async function updateGiftCardDetails(req, res){
     try {
         const { giftCardId, code, minPrice, maxPrice, description } = req.body;
 
-        let imageDetails = await cloudinary.uploader.upload(req.file.path);
-    
-        if (!code || !minPrice || !maxPrice || !description) {
-            return res.status(400).json({ message: 'Missing fields'});
-        }     
+        const existingGiftCard = await GiftCard.findById(giftCardId);
+        if (!existingGiftCard) {
+            return res.status(404).json({ message: 'Gift card not found' });
+        }
 
-        const codeExist = await GiftCard.findOne({code});
-        if(codeExist){
-            return res.status(400).json({ 
-                message: 'Gift card code already exists',
-                errorCode: 'DUPLICATE_GIFT_CARD_CODE'
-            });
+        const duplicateCode = await GiftCard.findOne({ code, _id: { $ne: giftCardId } });
+        if (duplicateCode) {
+        return res.status(400).json({ 
+            message: 'Gift card code already exists',
+            errorCode: 'DUPLICATE_GIFT_CARD_CODE'
+        });
         }
-    
-        const updatedCard = await GiftCard.findByIdAndUpdate(
-            giftCardId,
-            {
-                code: code.trim(),
-                minPrice,
-                maxPrice,
-                description,
-                imagePath: imageDetails.url
-            },
-            { new: true, runValidators: true }
-        );
-    
-        if (!updatedCard) {
-          return res.status(404).json({ message: 'Gift card not found' });
+
+        let imageUrl = existingGiftCard.imagePath;
+        if (req.file) {
+            const imageDetails = await cloudinary.uploader.upload(req.file.path);
+            imageUrl = imageDetails.url;
         }
-    
+
+
+        existingGiftCard.code = code;
+        existingGiftCard.minPrice = minPrice;
+        existingGiftCard.maxPrice = maxPrice;
+        existingGiftCard.description = description;
+        existingGiftCard.imagePath = imageUrl;
+
+        const updatedCard = await existingGiftCard.save();
+
         res.status(200).json({ message: 'Gift card updated successfully', data: updatedCard });
+
     } catch (error) {
         res.status(500).json({ message: 'Error updating gift card', error: error.message });
     }
@@ -148,7 +147,8 @@ async function listGiftCardsWithPagination(req, res){
 
 async function deleteGiftCard(req, res){
     try {
-        const { giftCardId } = req.query;
+        const  { giftCardId } = req.body;
+        console.log(giftCardId)
     
         const deletedGiftCard = await GiftCard.findByIdAndDelete(giftCardId);
     

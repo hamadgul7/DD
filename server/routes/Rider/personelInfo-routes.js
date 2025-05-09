@@ -24,6 +24,7 @@ router.post('/addRiderDetails', upload.fields([
 
 router.get('/listOfSalesperson', riderController.listOfSalesperson);
 router.get('/riderOrdersById', riderController.riderOrdersById);
+router.post('/riderOrderStatus', riderController.updateOrderStatusByRider);
 
 
 

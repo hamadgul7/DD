@@ -146,10 +146,36 @@ async function riderOrdersById(req, res){
   }
 }
 
+async function updateOrderStatusByRider(req, res){
+    const { orderId, riderId, status } = req.body;
+
+    try {
+        if (!orderId || !riderId) {
+            return res.status(400).json({ message: "Order ID and Rider ID are required" });
+        }
+
+        const order = await Order.findOneAndUpdate(
+            { _id: orderId, riderId: riderId },
+            { $set: { status: status } },
+            { new: true }
+        );
+
+        if (!order) {
+            return res.status(404).json({ message: "Order not found or Rider ID mismatch" });
+        }
+
+        res.status(200).json({ message: "Status Updated Successfully", order });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 
 
 module.exports = {
     addRiderDetails: addRiderDetails,
     listOfSalesperson: listOfSalesperson,
-    riderOrdersById:  riderOrdersById
+    riderOrdersById:  riderOrdersById,
+    updateOrderStatusByRider: updateOrderStatusByRider
 }
