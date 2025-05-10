@@ -11,12 +11,6 @@ const giftCardSchema = new mongoose.Schema(
             type: String
         },
 
-        code: {
-            type: String,
-            required: true,
-            trim: true
-        },
-
         minPrice: {
             type: String,
             required: true,

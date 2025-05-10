@@ -10,24 +10,23 @@ cloudinary.config({
 
 async function addGiftCard(req, res) {
     try {
-        const { businessId, code, minPrice, maxPrice, description } = req.body;
+        const { businessId, minPrice, maxPrice, description } = req.body;
 
         let imageDetails = await cloudinary.uploader.upload(req.file.path);
 
-        const codeExist = await GiftCard.findOne({code});
-        if(codeExist){
-            return res.status(400).json({ 
-                message: 'Gift card code already exists',
-                errorCode: 'DUPLICATE_GIFT_CARD_CODE'
-            });
-        }
+        // const codeExist = await GiftCard.findOne({code});
+        // if(codeExist){
+        //     return res.status(400).json({ 
+        //         message: 'Gift card code already exists',
+        //         errorCode: 'DUPLICATE_GIFT_CARD_CODE'
+        //     });
+        // }
         
         const { name } = await Business.findById(businessId)
 
         const newGiftCard = new GiftCard({
             businessId,
             businessName: name,
-            code,
             minPrice,
             maxPrice,   
             description,
@@ -62,20 +61,20 @@ async function viewGiftCardDetails(req, res){
 
 async function updateGiftCardDetails(req, res){
     try {
-        const { giftCardId, code, minPrice, maxPrice, description } = req.body;
+        const { giftCardId, minPrice, maxPrice, description } = req.body;
 
         const existingGiftCard = await GiftCard.findById(giftCardId);
         if (!existingGiftCard) {
             return res.status(404).json({ message: 'Gift card not found' });
         }
 
-        const duplicateCode = await GiftCard.findOne({ code, _id: { $ne: giftCardId } });
-        if (duplicateCode) {
-        return res.status(400).json({ 
-            message: 'Gift card code already exists',
-            errorCode: 'DUPLICATE_GIFT_CARD_CODE'
-        });
-        }
+        // const duplicateCode = await GiftCard.findOne({ code, _id: { $ne: giftCardId } });
+        // if (duplicateCode) {
+        // return res.status(400).json({ 
+        //     message: 'Gift card code already exists',
+        //     errorCode: 'DUPLICATE_GIFT_CARD_CODE'
+        // });
+        // }
 
         let imageUrl = existingGiftCard.imagePath;
         if (req.file) {
@@ -84,7 +83,6 @@ async function updateGiftCardDetails(req, res){
         }
 
 
-        existingGiftCard.code = code;
         existingGiftCard.minPrice = minPrice;
         existingGiftCard.maxPrice = maxPrice;
         existingGiftCard.description = description;

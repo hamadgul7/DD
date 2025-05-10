@@ -48,6 +48,11 @@ const purchasedGiftCardSchema = new mongoose.Schema(
         status: {
             type: String,
             default: 'Active'
+        },
+
+        redeemCode: {
+            type: String,
+            required: true,
         }
     },
     { timestamps: true }
