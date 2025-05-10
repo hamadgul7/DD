@@ -70,6 +70,9 @@ async function createDiscountSummary(req, res){
     const {
         userId,
         discountAmount,
+        giftCardAmount,
+        giftCardId,
+        giftCardRedeemCode,
         orderSubtotal,
         orderTotal,
         pointsRedeemed,
@@ -85,6 +88,9 @@ async function createDiscountSummary(req, res){
             { userId },
             {
                 discountAmount,
+                giftCardAmount,
+                giftCardId,
+                giftCardRedeemCode,
                 orderSubtotal,
                 orderTotal,
                 pointsRedeemed,
