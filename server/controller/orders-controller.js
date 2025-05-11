@@ -9,6 +9,7 @@ const User = require('../model/auth-model');
 const { Achievement, Mission } = require('../model/achievementAndMissions-model');
 const mongoose = require('mongoose');
 const CartSummary = require('../model/Customer/cartSummary-model');
+const PurchasedGiftCard = require('../model/Customer/purchasedGiftCard-model');
 
 
 async function addOrderDetails(req, res) {
@@ -115,6 +116,23 @@ async function addOrderDetails(req, res) {
             const order = new Order(orderData);
             await order.save();
             createdOrders.push(order);
+
+           // ✅ Update gift card balance 
+            if (discountData?.giftCardId && discountData?.giftCardAmount) {
+                const purchasedGiftCard = await PurchasedGiftCard.findById(discountData.giftCardId);
+                if (purchasedGiftCard) {
+                    purchasedGiftCard.remainingAmount = Math.max(0, purchasedGiftCard.remainingAmount - discountData.giftCardAmount);
+
+                    // If balance becomes 0, mark the gift card as expired
+                    if (purchasedGiftCard.remainingAmount === 0) {
+                        purchasedGiftCard.status = 'Expired';
+                    }
+
+                    await purchasedGiftCard.save();
+                }
+            }
+
+
             const usedPoints = Number(discountData.pointsRedeemed);
             if (!isNaN(usedPoints) && usedPoints > 0) {
                 await UserPoints.findOneAndUpdate(

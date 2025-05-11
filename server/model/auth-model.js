@@ -66,6 +66,12 @@ const userSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId, 
       ref: 'Business', 
     },
+
+    isApproved: { type: Boolean, default: false },
+    status: {
+      type: String,
+      default: 'Pending'
+    }
   },
   { timestamps: true }
 );

@@ -11,7 +11,11 @@ const riderSchema = new mongoose.Schema(
         CNICFrontPath: { type: String },
         CNICBackPath: { type: String },
         motorCycleDocPath: { type: String },
-        isApproved: { type: Boolean, default: false }
+        isApproved: { type: Boolean, default: false },
+        status: {
+            type: String,
+            default: 'Pending'
+        }
 
     }, 
     { timestamps: true }

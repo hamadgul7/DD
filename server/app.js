@@ -25,6 +25,7 @@ const adminBusinessRoutes = require('./routes/Admin/business-routes');
 const adminPlanSubscriberRoutes = require('./routes/Admin/subscription-routes');
 const adminSubscriptionReportRoutes = require('./routes/Admin/subscriptionReport-routes');
 const adminAchievementRoutes = require('./routes/Admin/achievementAndMissions-routes');
+const adminRiderRoutes = require('./routes/Admin/rider-routes');
 const riderController = require('./routes/Rider/personelInfo-routes')
 
 const chatRoutes = require('./routes/chat-routes');
@@ -68,6 +69,7 @@ app.use('/admin', adminBusinessRoutes);
 app.use('/admin', adminPlanSubscriberRoutes);
 app.use('/admin', adminSubscriptionReportRoutes);
 app.use('/admin', adminAchievementRoutes);
+app.use('/admin', adminRiderRoutes);
 app.use('/rider', riderController);
 
 app.use('/api/chats', chatRoutes);
