@@ -8,5 +8,6 @@ router.get('/getAllRiders', riderController.getAllRiders);
 router.get('/viewRiderDetails', riderController.viewRiderDetails);
 router.post('/approveRider', riderController.approveRider);
 router.post('/rejectRider', riderController.rejectRider);
+router.post('/deleteRider', riderController.deleteRider);
 
 module.exports = router;

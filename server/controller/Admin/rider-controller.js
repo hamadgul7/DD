@@ -3,11 +3,45 @@ const User = require('../../model/auth-model');
 const nodemailer = require("nodemailer");
 
 async function getAllRiders(req, res){
+    const { pageNo, limit } = req.query;
+
     try {
-        const riders = await Rider.find();
-        res.status(200).json({ success: true, data: riders });
+        const pageNumber = parseInt(pageNo) || 1;
+        const pageLimit = parseInt(limit) || 10;
+
+        if (pageNumber < 1 || pageLimit < 1) {
+            return res.status(400).json({ message: "Page number and limit must be positive integers" });
+        }
+
+        const skip = (pageNumber - 1) * pageLimit;
+
+        const riders = await Rider.find().skip(skip).limit(pageLimit);
+        const totalRiders = await Rider.countDocuments();
+        const totalPages = Math.ceil(totalRiders / pageLimit);
+
+        const nextPage = pageNumber < totalPages ? pageNumber + 1 : null;
+        const previousPage = pageNumber > 1 ? pageNumber - 1 : null;
+
+        res.status(200).json({
+            success: true,
+            data: riders,
+            meta: {
+                totalItems: totalRiders,
+                totalPages,
+                currentPage: pageNumber,
+                pageLimit,
+                nextPage,
+                previousPage
+            },
+            message: "Riders retrieved successfully"
+        });
+
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error......', error: error.message });
+        res.status(500).json({
+            success: false,
+            message: 'Server Error',
+            error: error.message
+        });
     }
 }
 
@@ -141,9 +175,32 @@ async function rejectRider(req, res){
     }
 }
 
+async function deleteRider(req, res){
+    const { riderId } = req.body;
+
+    try {
+        const deletedRider = await Rider.findOneAndDelete({ riderId });
+
+        const riderDetails = await User.findByIdAndUpdate(
+            riderId ,
+            { isApproved: false, status: '', isDetailsAdded: false },
+            { new: true }
+        );
+
+        if (!deletedRider) {
+            return res.status(404).send('Rider not found');
+        }
+
+        res.send('Rider deleted successfully');
+    } catch (err) {
+        res.status(500).send('Server Error');
+    }
+}
+
 module.exports = {
     getAllRiders: getAllRiders,
     viewRiderDetails: viewRiderDetails,
     approveRider: approveRider,
-    rejectRider: rejectRider
+    rejectRider: rejectRider,
+    deleteRider: deleteRider
 }
