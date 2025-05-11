@@ -14,6 +14,7 @@ const customerCartRoute = require('./routes/Customer/cart-routes');
 const customerProductsRoute = require('./routes/Customer/customerProduct-routes');
 const customerLoyaltyPointRoutes = require('./routes/Customer/loyaltyPoints-routes');
 const customerGiftCardRoutes = require('./routes/Customer/purchasedGiftCard-routes');
+const customerFAQSRoutes = require('./routes/Customer/customerFAQS-routes');
 const orderRoutes = require('./routes/order-routes');
 const customerProductReviewRoutes = require('./routes/Customer/customerProductReview-routes');
 const businessProductReviewRoutes = require('./routes/Branch Owner/businessProductReviews-routes');
@@ -26,6 +27,7 @@ const adminPlanSubscriberRoutes = require('./routes/Admin/subscription-routes');
 const adminSubscriptionReportRoutes = require('./routes/Admin/subscriptionReport-routes');
 const adminAchievementRoutes = require('./routes/Admin/achievementAndMissions-routes');
 const adminRiderRoutes = require('./routes/Admin/rider-routes');
+const adminFAQsRoutes = require('./routes/Admin/faqs-routes');
 const riderController = require('./routes/Rider/personelInfo-routes')
 
 const chatRoutes = require('./routes/chat-routes');
@@ -58,6 +60,7 @@ app.use('/customer', customerCartRoute);
 app.use('/customer', customerProductsRoute);
 app.use('/customer', customerLoyaltyPointRoutes);
 app.use('/customer', customerGiftCardRoutes);
+app.use('/customer', customerFAQSRoutes);
 app.use(orderRoutes);
 app.use('/customer', customerProductReviewRoutes);
 app.use('/branchOwner', businessProductReviewRoutes);
@@ -70,6 +73,7 @@ app.use('/admin', adminPlanSubscriberRoutes);
 app.use('/admin', adminSubscriptionReportRoutes);
 app.use('/admin', adminAchievementRoutes);
 app.use('/admin', adminRiderRoutes);
+app.use('/admin', adminFAQsRoutes);
 app.use('/rider', riderController);
 
 app.use('/api/chats', chatRoutes);
