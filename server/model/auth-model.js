@@ -68,10 +68,14 @@ const userSchema = new mongoose.Schema(
     },
 
     isApproved: { type: Boolean, default: false },
+
     status: {
       type: String,
       default: 'Pending'
-    }
+    },
+
+    isDetailsAdded: { type: Boolean, default: false },
+
   },
   { timestamps: true }
 );

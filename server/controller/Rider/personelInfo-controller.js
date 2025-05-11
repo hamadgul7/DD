@@ -4,7 +4,8 @@ const { Business, Branch } = require('../../model/Branch Owner/business-model');
 const Salesperson = require('../../model/Branch Owner/salesperson-model');
 const Order = require('../../model/orders-model');
 const mongoose = require('mongoose');
-const CartSummary = require('../../model/Customer/cartSummary-model')
+const CartSummary = require('../../model/Customer/cartSummary-model');
+const User = require('../../model/auth-model.js');
 
 
 async function addRiderDetails(req, res){
@@ -41,11 +42,17 @@ async function addRiderDetails(req, res){
           CNICFrontPath: cnicFrontUrl,
           CNICBackPath: cnicBackUrl,
           motorCycleDocPath: bikeDocsUrl,
-          isApproved: false // Default approval
+          isApproved: false, // Default approval
         });
     
         // Save to the database
         const savedRider = await newRider.save();
+
+        const riderDetails = await User.findByIdAndUpdate(
+            userId,
+            { isDetailsAdded: true },
+            { new: true }
+        )
     
         res.status(201).json({ message: 'Rider added successfully', data: savedRider });
     
