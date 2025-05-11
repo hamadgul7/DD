@@ -36,7 +36,25 @@ async function getMessages(req, res){
     }
 }
 
+async function deleteMessage(req, res){
+    const { messageId } = req.query;
+
+    try {
+        const deletedMessage = await Message.findByIdAndDelete(messageId);
+
+        if (!deletedMessage) {
+            return res.status(404).json({ success: false, message: "Message not found" });
+        }
+
+        res.status(200).json({ success: true, message: "Message deleted successfully" });
+    } catch (err) {
+        console.error("Error deleting message:", err);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+}
+
 module.exports = {
     createMessage: createMessage,
-    getMessages: getMessages
+    getMessages: getMessages,
+    deleteMessage: deleteMessage
 }

@@ -45,6 +45,21 @@ io.on("connection", (socket) => {
         socket.emit("messageSent", message);
     });
 
+    // Real-time message deletion (no DB involved)
+    socket.on("deleteMessage", ({ messageId, recipientId }) => {
+        console.log(`Received delete request for message ID: ${messageId}`);
+
+        // Notify recipient if online
+        const recipient = onlineUsers.find(user => user.userId === recipientId);
+        if (recipient) {
+            io.to(recipient.socketId).emit("messageDeleted", { messageId });
+        }
+
+        // Also notify sender (optional but recommended)
+        socket.emit("messageDeleted", { messageId });
+    });
+
+
     // Handle disconnection
     socket.on("disconnect", () => {
         console.log("User disconnected:", socket.id);
