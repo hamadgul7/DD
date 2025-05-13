@@ -14,6 +14,9 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.get('/getProfileDetails',  manageProfileController.getUserDetails);
-router.post('/updateProfileDetails', upload.single('image'), manageProfileController.updateUserDetails);
+router.post('/updatePersonelDetails', manageProfileController.updatePersonelDetails);
+router.post('/updateBusinessDetails', manageProfileController.updateBusinessDetails);
+router.post('/updatePicture', upload.single('image'), manageProfileController.updatePicture);
+router.post('/updatePassword',  manageProfileController.changePassword);
 
 module.exports = router;

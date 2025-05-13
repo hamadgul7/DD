@@ -89,7 +89,7 @@ async function addOrderDetails(req, res) {
                 colorVariant.quantity -= quantity; 
                 variant.variantTotal -= quantity; 
                 product.totalQuantity -= quantity; 
-                product.totalAssignedQuantity -= quantity; 
+                // product.totalAssignedQuantity -= quantity; 
 
                 await product.save(); 
             }
@@ -1401,9 +1401,20 @@ async function assignOrderToBranch(req, res){
     
             colorVariant.quantity -= quantity; 
             branchProduct.totalBranchQuantity -= quantity; 
+
+            console.log("Helloo",productId._id)
+            console.log("boloooo",branch.branchCode)
+            const product = await Product.findOne({
+                _id: productId._id,
+                branch: { $in: [branch.branchCode] }
+            });
+
+            product.totalAssignedQuantity -= quantity;
     
             await branchProduct.save(); 
         }
+
+        
     
       
         if (!allProductsFound) {
