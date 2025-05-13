@@ -33,6 +33,8 @@ const riderController = require('./routes/Rider/personelInfo-routes')
 const chatRoutes = require('./routes/chat-routes');
 const messageRoutes = require('./routes/message-routes');
 
+const userManageProfileRoutes = require('./routes/manageProfile-routes');
+
 
 const cors = require('cors');
 
@@ -78,6 +80,8 @@ app.use('/rider', riderController);
 
 app.use('/api/chats', chatRoutes);
 app.use('/api/messages', messageRoutes);
+
+app.use('/user', userManageProfileRoutes);
 
 
 
