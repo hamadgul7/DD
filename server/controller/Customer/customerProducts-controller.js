@@ -9,6 +9,7 @@ async function getCustomerProductbyId(req, res){
             path: "business",
             select: "name", 
         });
+        console.log("Product Details", product)
 
         if (!product) {
             return res.status(404).json({ message: "No Product Found" });
@@ -17,7 +18,10 @@ async function getCustomerProductbyId(req, res){
         res.status(200).json({
             product: {
                 ...product.toObject(), 
-                business: product.business ? product.business._id : null, 
+                business: product.business ? {
+                _id: product.business._id,
+                name: product.business.name
+                } : null,
             },
             brand: product.business ? product.business.name : null, 
             message: "Product Retrieved Successfully",

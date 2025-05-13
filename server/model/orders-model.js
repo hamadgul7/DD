@@ -99,7 +99,7 @@ const ordersSchema = new mongoose.Schema(
 
         riderId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Rider',
+            ref: 'User',
             default: null
         },
 

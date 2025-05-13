@@ -2,12 +2,11 @@
 const mongoose = require('mongoose');
 
 const pointHistorySchema = new mongoose.Schema({
-    type: { type: String }, // e.g., "purchase", "mission", "login"
+    type: { type: String },
     description: { type: String },
     points: { type: Number, required: true },
     date: { type: Date, default: Date.now },
-    // New expiry fields (added to your existing schema)
-    expiresAfterDays: { type: Number, default: null }, // Null = never expires
+    expiresAfterDays: { type: Number, default: null }, 
     expiryDate: { 
         type: Date, 
         default: function() {
@@ -33,7 +32,7 @@ const achievementMilestoneSchema = new mongoose.Schema({
   
 const missionSchema = new mongoose.Schema({
     missionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Mission' },
-    title: { type: String, required: true },                 // e.g., "Daily Login"
+    title: { type: String, required: true },              
     description: { type: String },
     points: { type: Number, default: 0 },
     completed: { type: Boolean, default: false },

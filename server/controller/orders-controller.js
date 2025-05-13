@@ -1312,7 +1312,7 @@ async function getSalespersonOrders(req, res){
             return res.status(400).json({ message: "Branch Code is required" });
         }
 
-        const branchOrders = await Order.find({ branchCode }).populate('cartItems');
+        const branchOrders = await Order.find({ branchCode }).populate('cartItems').populate('riderId');;
 
         if (!branchOrders.length) {
             return res.status(200).json({ message: "No Orders found!!!!!" });
@@ -1451,6 +1451,7 @@ async function assignOrderToRider(req, res){
 
         order.riderId = riderId;
         const orderWithRider = await order.save();
+        
 
         return res.status(200).json({
             message: 'Rider assigned successfully',

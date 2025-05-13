@@ -37,7 +37,7 @@ async function getMessages(req, res){
 }
 
 async function deleteMessage(req, res){
-    const { messageId } = req.query;
+    const { messageId } = req.body;
 
     try {
         const deletedMessage = await Message.findByIdAndDelete(messageId);

@@ -50,7 +50,7 @@ async function addRiderDetails(req, res){
 
         const riderDetails = await User.findByIdAndUpdate(
             userId,
-            { isDetailsAdded: true },
+            { isDetailsAdded: true, status: 'Pending' },
             { new: true }
         )
     
@@ -80,8 +80,9 @@ async function listOfSalesperson(req, res){
         // Step 3: For each branch, attach salesperson details if exists
         const enrichedBranches = await Promise.all(
           branches.map(async (branch) => {
-            if (branch.salesperson) {
-              const salesperson = await User.findOne({assignedBranch: branch.salesperson}).lean();
+            if (branch.branchCode) {
+              const salesperson = await User.findOne({assignedBranch: branch.branchCode}).lean();
+              console.log("Salesperson", branch.branchCode)
 
               if (salesperson) {
                 const business = await Business.findById(salesperson.business).lean();
@@ -97,7 +98,7 @@ async function listOfSalesperson(req, res){
             return branch;
           })
         );
-    
+        
         res.status(200).json({ branches: enrichedBranches });
     } catch (error) {
         console.error('Error fetching branches and salesperson:', error);
@@ -177,7 +178,6 @@ async function updateOrderStatusByRider(req, res){
         res.status(500).json({ message: error.message });
     }
 };
-
 
 
 module.exports = {
