@@ -131,28 +131,51 @@ async function addOrderDetails(req, res) {
                 }
             }
 
+                if(user.role == "Customer"){
+                    const usedPoints = Number(discountData.pointsRedeemed);
+                    if (!isNaN(usedPoints) && usedPoints > 0) {
+                        await UserPoints.findOneAndUpdate(
+                            { userId },
+                            {
+                                $push: {
+                                    pointHistory: {
+                                        type: "redeem",
+                                        description: "Points redeemed on order",
+                                        points: -usedPoints,
+                                        date: new Date(),
+                                        isExpired: false,
+                                        expiresAfterDays: null,
+                                        expiryDate: null
+                                    }
+                                }
+                            },
+                            { new: true, runValidators: true }
+                        );
+                    }             
+                }
 
-            const usedPoints = Number(discountData.pointsRedeemed);
-            if (!isNaN(usedPoints) && usedPoints > 0) {
-                await UserPoints.findOneAndUpdate(
-                    { userId },
-                    {
-                        $push: {
-                            pointHistory: {
-                                type: "redeem",
-                                description: "Points redeemed on order",
-                                points: -usedPoints,
-                                date: new Date(),
-                                isExpired: false,
-                                expiresAfterDays: null,
-                                expiryDate: null
-                            }
-                        }
-                    },
-                    { new: true, runValidators: true }
-                );
-            }             
-        }
+            }
+        //     const usedPoints = Number(discountData.pointsRedeemed);
+        //     if (!isNaN(usedPoints) && usedPoints > 0) {
+        //         await UserPoints.findOneAndUpdate(
+        //             { userId },
+        //             {
+        //                 $push: {
+        //                     pointHistory: {
+        //                         type: "redeem",
+        //                         description: "Points redeemed on order",
+        //                         points: -usedPoints,
+        //                         date: new Date(),
+        //                         isExpired: false,
+        //                         expiresAfterDays: null,
+        //                         expiryDate: null
+        //                     }
+        //                 }
+        //             },
+        //             { new: true, runValidators: true }
+        //         );
+        //     }             
+        // }
 
         if(user.role == "Customer") {
             let userPoints = await UserPoints.findOne({ userId });
