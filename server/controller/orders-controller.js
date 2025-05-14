@@ -1410,7 +1410,8 @@ async function assignOrderToBranch(req, res){
             });
 
             product.totalAssignedQuantity -= quantity;
-    
+
+            await product.save(); 
             await branchProduct.save(); 
         }
 

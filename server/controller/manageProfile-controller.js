@@ -175,7 +175,7 @@ async function changePassword(req, res){
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Password update logic
+
     if (oldPassword && newPassword) {
       const isMatch = await bcrypt.compare(oldPassword, user.password);
       if (!isMatch) {
