@@ -225,19 +225,16 @@ async function listAllRiders(req, res){
     try {
         const salespersonId = req.query.userId;
       
-        // Step 1: Find Salesperson
         const salesperson = await User.findById(salespersonId);
         if (!salesperson) return res.status(404).json({ message: "Salesperson not found" });
       
         const branchCode = salesperson.assignedBranch;
-      
-        // Step 2: Find Branch using branchCode
+
         const branch = await Branch.findOne({ branchCode });
         if (!branch) return res.status(404).json({ message: "Branch not found" });
       
         const city = branch.city;
       
-        // Step 3: Find Riders in the same city (only riderId and name)
         const riders = await Rider.find({ city }).select('riderId name');
       
         res.status(200).json({ riders });

@@ -65,7 +65,7 @@ async function updatePersonelDetails(req, res) {
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        // Update user fields
+    
         user.firstname = formData.firstname;
         user.lastname = formData.lastname ;
         user.email = formData.email;
@@ -73,22 +73,22 @@ async function updatePersonelDetails(req, res) {
 
         const updatedDetails = await user.save();
 
-        // If Salesperson, update their details in the Salesperson schema as well
+  
         if (user.role === 'Salesperson') {
             const salesperson = await Salesperson.findOne({ business: user.business, assignBranch: user.assignedBranch });
             if (salesperson) {
-                salesperson.name = `${formData.firstname} ${formData.lastname}`;  // Update salesperson name
-                salesperson.email = formData.email;  // Update salesperson email
+                salesperson.name = `${formData.firstname} ${formData.lastname}`;  
+                salesperson.email = formData.email;
                 await salesperson.save();
             }
         }
 
-        // If Rider, update their details in the Rider schema as well
+     
         if (user.role === 'Rider') {
             const rider = await Rider.findOne({ riderId: user._id });
             if (rider) {
-                rider.name = `${formData.firstname} ${formData.lastname}`;  // Update rider name
-                rider.contactNo = formData.phone ;  // Update rider contactNo
+                rider.name = `${formData.firstname} ${formData.lastname}`;  
+                rider.contactNo = formData.phone ;  
                 await rider.save();
             }
         }

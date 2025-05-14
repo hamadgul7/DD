@@ -94,7 +94,7 @@ async function approveRider(req, res){
 
         const mailOptions = {
             from: process.env.EMAIL_USER,
-            to: riderDetails.email, // replace with the correct rider email variable
+            to: riderDetails.email, 
             subject: "Rider Approval - Diverse Den",
             html: `
                 <div style="font-family: Arial, sans-serif; line-height: 1.6;">
@@ -150,7 +150,7 @@ async function rejectRider(req, res){
 
         const mailOptions = {
             from: process.env.EMAIL_USER,
-            to: riderDetails.email, // replace with the correct rider email variable
+            to: riderDetails.email, 
             subject: "Rider Application Status - Diverse Den",
             html: `
                 <div style="font-family: Arial, sans-serif; line-height: 1.6;">

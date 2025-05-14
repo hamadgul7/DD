@@ -4,18 +4,16 @@ const Product = require('../../model/Branch Owner/products-model');
 const moment = require('moment');
 
 
-//Sales
 function getDatesInRange(startDate, endDate) {
     const dates = [];
     let currentDate = new Date(startDate);
     const endDateObj = new Date(endDate);
   
     while (currentDate <= endDateObj) {
-      dates.push(currentDate.toISOString().slice(0, 10)); // Push date in YYYY-MM-DD format
+      dates.push(currentDate.toISOString().slice(0, 10)); 
       
-      // Create a new Date object for the next iteration
       const nextDate = new Date(currentDate);
-      nextDate.setDate(currentDate.getDate() + 1); // Move to the next day
+      nextDate.setDate(currentDate.getDate() + 1); 
       currentDate = nextDate;
     }
     
@@ -28,26 +26,25 @@ async function weeklySalesReports(req, res) {
     
         let start, end;
     
-        // If both startDate and endDate are provided, use them; else set default to exactly 7 days
+    
         if (startDate && endDate) {
-          // Parse provided dates and set time range
+   
           start = new Date(startDate + "T00:00:00.000Z");
           end = new Date(endDate + "T23:59:59.999Z");
         } else {
-          // If no dates are provided, calculate exactly 7 days (including today)
+       
           end = new Date();
           end.setHours(23, 59, 59, 999);
           
-          // Set start date to exactly 7 days before end date (inclusive)
+  
           start = new Date(end);
-          start.setDate(end.getDate() - 5); // 6 days before today + today = 7 days
+          start.setDate(end.getDate() - 5); 
           start.setHours(0, 0, 0, 0);
         }
     
         console.log("Start Date in UTC:", start.toISOString());
         console.log("End Date in UTC:", end.toISOString());
-        
-        // Verify we have exactly 7 days
+
         const checkDateRange = getDatesInRange(
           start.toISOString().slice(0, 10),
           end.toISOString().slice(0, 10)
@@ -58,38 +55,37 @@ async function weeklySalesReports(req, res) {
         }
         console.log("Date range:", checkDateRange);
     
-        // Validate if businessId is provided
+
         if (!businessId) {
           return res.status(400).json({ error: "Business ID is required." });
         }
     
-        // Fetch the orders for the specified businessId, status 'Delivered', and within the date range
+  
         const salesData = await Order.aggregate([
           {
             $match: {
               businessId: new mongoose.Types.ObjectId(businessId),
               status: "Delivered",
               createdAt: { 
-                $gte: start,  // Greater than or equal to start date
-                $lte: end     // Less than or equal to end date
+                $gte: start, 
+                $lte: end     
               }
             }
           },
           {
             $group: {
               _id: {
-                $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }  // Group by day
+                $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }  
               },
-              totalSales: { $sum: "$subTotal" },  // Sum totalAmount for each day
-              orderCount: { $sum: 1 }  // Count number of orders for each day
+              totalSales: { $sum: "$subTotal" },  
+              orderCount: { $sum: 1 }  
             }
           },
           {
-            $sort: { _id: 1 }  // Sort by date ascending
+            $sort: { _id: 1 }  
           }
         ]);
 
-        // Add another aggregation to get the total weekly sales
         const weeklyTotal = await Order.aggregate([
           {
             $match: {
@@ -103,17 +99,15 @@ async function weeklySalesReports(req, res) {
           },
           {
             $group: {
-              _id: null,  // Group all documents together
+              _id: null, 
               totalWeeklySales: { $sum: "$subTotal" },
               totalWeeklyOrders: { $sum: 1 }
             }
           }
         ]);
     
-        // Get all the dates in the range from the start date to the end date
         const allDates = getDatesInRange(start.toISOString().slice(0, 10), end.toISOString().slice(0, 10));
     
-        // Map the salesData and fill in the missing days with 0 values for sales and order count
         const formattedSalesData = allDates.map(date => {
           const salesForDay = salesData.find(sale => sale._id === date);
           return {
@@ -123,7 +117,6 @@ async function weeklySalesReports(req, res) {
           };
         });
     
-        // Return the sales data including days with no sales and the weekly totals
         return res.json({ 
           dailySales: formattedSalesData,
           weeklySales: {
@@ -157,11 +150,11 @@ const monthNameToNumber = {
 
 function getAllDaysOfMonth(year, monthNumber) {
   const days = [];
-  const lastDay = new Date(year, monthNumber, 0).getDate(); // Last date of month
+  const lastDay = new Date(year, monthNumber, 0).getDate(); 
 
   for (let day = 1; day <= lastDay; day++) {
     const date = new Date(Date.UTC(year, monthNumber - 1, day));
-    days.push(date.toISOString().slice(0, 10)); // "YYYY-MM-DD"
+    days.push(date.toISOString().slice(0, 10)); 
   }
 
   return days;
@@ -178,20 +171,19 @@ async function monthlySalesReports(req, res) {
     let selectedMonth, selectedYear;
 
     if (month && year) {
-      // If month and year are provided
+
       selectedMonth = monthNameToNumber[month];
       if (!selectedMonth) {
         return res.status(400).json({ error: "Invalid month name provided." });
       }
       selectedYear = parseInt(year);
     } else {
-      // Default to current month and year
+
       const currentDate = new Date();
-      selectedMonth = currentDate.getUTCMonth() + 1; // 0-indexed in JS
+      selectedMonth = currentDate.getUTCMonth() + 1; 
       selectedYear = currentDate.getUTCFullYear();
     }
 
-    // Calculate start and end date of the month
     const startDate = new Date(Date.UTC(selectedYear, selectedMonth - 1, 1, 0, 0, 0));
     const endDate = new Date(Date.UTC(selectedYear, selectedMonth, 0, 23, 59, 59, 999));
 
@@ -220,10 +212,9 @@ async function monthlySalesReports(req, res) {
       }
     ]);
 
-    // Generate all days of the month
     const allDaysInMonth = getAllDaysOfMonth(selectedYear, selectedMonth);
 
-    // Fill missing days
+
     const formattedSalesData = allDaysInMonth.map(date => {
       const sale = salesData.find(s => s._id === date);
       return {
@@ -233,7 +224,7 @@ async function monthlySalesReports(req, res) {
       };
     });
 
-    // Calculate total monthly sales
+
     const totalMonthlySales = formattedSalesData.reduce((sum, day) => sum + day.totalSales, 0);
 
     res.json({
@@ -255,12 +246,10 @@ async function yearlySalesReports(req, res){
       return res.status(400).json({ error: "businessId is required." });
     }
 
-    // Use provided year or current year
     const selectedYear = year ? parseInt(year) : new Date().getUTCFullYear();
 
-    // Start and End Dates for the Year
-    const startDate = new Date(Date.UTC(selectedYear, 0, 1, 0, 0, 0)); // Jan 1st
-    const endDate = new Date(Date.UTC(selectedYear, 11, 31, 23, 59, 59, 999)); // Dec 31st
+    const startDate = new Date(Date.UTC(selectedYear, 0, 1, 0, 0, 0)); 
+    const endDate = new Date(Date.UTC(selectedYear, 11, 31, 23, 59, 59, 999)); 
 
     console.log("Start Date:", startDate);
     console.log("End Date:", endDate);
@@ -275,7 +264,7 @@ async function yearlySalesReports(req, res){
       },
       {
         $group: {
-          _id: { $month: "$createdAt" }, // Group by month number (1-12)
+          _id: { $month: "$createdAt" },
           totalSales: { $sum: "$subTotal" },
           orderCount: { $sum: 1 }
         }
@@ -300,7 +289,6 @@ async function yearlySalesReports(req, res){
       12: "December"
     };
 
-    // Prepare all months with 0 if missing
     const formattedSalesData = [];
     for (let month = 1; month <= 12; month++) {
       const sale = salesData.find(s => s._id === month);
@@ -311,7 +299,7 @@ async function yearlySalesReports(req, res){
       });
     }
 
-    // Calculate total yearly sales
+
     const totalYearlySales = formattedSalesData.reduce((sum, month) => sum + month.totalSales, 0);
 
     res.json({
@@ -326,36 +314,34 @@ async function yearlySalesReports(req, res){
 }
 
 
-//Revenue
+
 async function weeklyRevenueReports(req, res) {
   try {
     const { businessId, startDate, endDate } = req.query;
 
     let start, end;
 
-    // Set start and end dates
     if (startDate && endDate) {
       start = new Date(startDate + "T00:00:00.000Z");
       end = new Date(endDate + "T23:59:59.999Z");
     } else {
-      // Default: exactly 7 days including today
+
       end = new Date();
       end.setHours(23, 59, 59, 999);
 
       start = new Date(end);
-      start.setDate(end.getDate() - 6); // 6 days before today + today = 7 days
+      start.setDate(end.getDate() - 6); 
       start.setHours(0, 0, 0, 0);
     }
 
     console.log("Start Date in UTC:", start.toISOString());
     console.log("End Date in UTC:", end.toISOString());
 
-    // Validate businessId
+
     if (!businessId) {
       return res.status(400).json({ error: "Business ID is required." });
     }
 
-    // Fetch delivered orders within the range
     const revenueData = await Order.aggregate([
       {
         $match: {
@@ -381,7 +367,6 @@ async function weeklyRevenueReports(req, res) {
       }
     ]);
 
-    // Calculate total weekly revenue
     const weeklyTotal = await Order.aggregate([
       {
         $match: {
@@ -402,10 +387,9 @@ async function weeklyRevenueReports(req, res) {
       }
     ]);
 
-    // Create full date range
     const allDates = getDatesInRange(start.toISOString().slice(0, 10), end.toISOString().slice(0, 10));
 
-    // Format the daily revenue with missing days = 0
+
     const formattedRevenueData = allDates.map(date => {
       const revenueForDay = revenueData.find(rev => rev._id === date);
       return {
@@ -415,7 +399,7 @@ async function weeklyRevenueReports(req, res) {
       };
     });
 
-    // Response
+
     return res.json({
       dailyRevenue: formattedRevenueData,
       weeklyRevenue: {
@@ -449,20 +433,19 @@ async function monthlyRevenueReports(req, res) {
       }
       selectedYear = parseInt(year);
     } else {
-      // Default to current month/year
+  
       const currentDate = new Date();
-      selectedMonth = currentDate.getUTCMonth() + 1; // 0-indexed
+      selectedMonth = currentDate.getUTCMonth() + 1; 
       selectedYear = currentDate.getUTCFullYear();
     }
 
-    // Start and End of the month
     const startDate = new Date(Date.UTC(selectedYear, selectedMonth - 1, 1, 0, 0, 0));
     const endDate = new Date(Date.UTC(selectedYear, selectedMonth, 0, 23, 59, 59, 999));
 
     console.log("Start Date:", startDate);
     console.log("End Date:", endDate);
 
-    // Fetch revenue grouped by each day
+
     const revenueData = await Order.aggregate([
       {
         $match: {
@@ -485,10 +468,10 @@ async function monthlyRevenueReports(req, res) {
       }
     ]);
 
-    // Generate all days of month
+
     const allDaysInMonth = getAllDaysOfMonth(selectedYear, selectedMonth);
 
-    // Fill missing days
+
     const formattedRevenueData = allDaysInMonth.map(date => {
       const revenue = revenueData.find(r => r._id === date);
       return {
@@ -498,7 +481,7 @@ async function monthlyRevenueReports(req, res) {
       };
     });
 
-    // Calculate total monthly revenue
+
     const totalMonthlyRevenue = formattedRevenueData.reduce((sum, day) => sum + day.totalRevenue, 0);
 
     res.json({
@@ -520,12 +503,12 @@ async function yearlyRevenueReports(req, res) {
       return res.status(400).json({ error: "Business ID is required." });
     }
 
-    // Use provided year or default to current year
+
     const selectedYear = year ? parseInt(year) : new Date().getUTCFullYear();
 
-    // Start and End Dates for the Year
-    const startDate = new Date(Date.UTC(selectedYear, 0, 1, 0, 0, 0));   // Jan 1st
-    const endDate = new Date(Date.UTC(selectedYear, 11, 31, 23, 59, 59, 999)); // Dec 31st
+
+    const startDate = new Date(Date.UTC(selectedYear, 0, 1, 0, 0, 0));   
+    const endDate = new Date(Date.UTC(selectedYear, 11, 31, 23, 59, 59, 999)); 
 
     console.log("Start Date:", startDate);
     console.log("End Date:", endDate);
@@ -540,8 +523,8 @@ async function yearlyRevenueReports(req, res) {
       },
       {
         $group: {
-          _id: { $month: "$createdAt" },  // Group by month number (1-12)
-          totalRevenue: { $sum: "$totalAmount" },  // Summing subTotal for revenue
+          _id: { $month: "$createdAt" }, 
+          totalRevenue: { $sum: "$totalAmount" },  
           orderCount: { $sum: 1 }
         }
       },
@@ -565,7 +548,7 @@ async function yearlyRevenueReports(req, res) {
       12: "December"
     };
 
-    // Prepare all months with 0 if missing
+
     const formattedRevenueData = [];
     for (let month = 1; month <= 12; month++) {
       const revenue = revenueData.find(r => r._id === month);
@@ -576,7 +559,7 @@ async function yearlyRevenueReports(req, res) {
       });
     }
 
-    // Calculate total yearly revenue
+
     const totalYearlyRevenue = formattedRevenueData.reduce((sum, month) => sum + month.totalRevenue, 0);
 
     res.json({
@@ -591,7 +574,7 @@ async function yearlyRevenueReports(req, res) {
 }
 
 
-//Trending Products
+
 async function dailyTrendingProducts(req, res) {
   const { businessId, date } = req.query;
 
@@ -600,10 +583,10 @@ async function dailyTrendingProducts(req, res) {
   }
 
   try {
-    // Convert businessId to ObjectId
+
     const businessIdObjectId = new mongoose.Types.ObjectId(businessId);
 
-    // Handle date: if provided, use it; otherwise, use today's date
+
     const selectedDate = date ? moment(date) : moment();
     const start = selectedDate.startOf('day').toDate();
     const end = selectedDate.endOf('day').toDate();
@@ -624,13 +607,13 @@ async function dailyTrendingProducts(req, res) {
       },
       {
         $group: {
-          _id: '$cartItems.productId._id', // Group by productId
-          totalSold: { $sum: '$cartItems.quantity' }, // Sum quantity sold
-          productTitle: { $first: '$cartItems.productId.title' }, // Get product title
+          _id: '$cartItems.productId._id', 
+          totalSold: { $sum: '$cartItems.quantity' }, 
+          productTitle: { $first: '$cartItems.productId.title' }, 
         },
       },
       {
-        $sort: { totalSold: -1 }, // Sort by totalSold descending
+        $sort: { totalSold: -1 }, 
       },
       {
         $project: {
@@ -731,15 +714,15 @@ async function monthlyTrendingProducts(req, res){
   }
 
   try {
-    // Convert businessId to ObjectId
+    
     const businessIdObjectId = new mongoose.Types.ObjectId(businessId);
 
     let startOfMonth, endOfMonth;
     let finalMonth, finalYear;
 
     if (month && year) {
-      // When month and year are provided
-      const monthNumber = moment().month(month).format("M"); // Convert "May" -> 5
+      
+      const monthNumber = moment().month(month).format("M"); 
       if (!monthNumber) {
         return res.status(400).json({ error: 'Invalid month provided' });
       }
@@ -750,12 +733,12 @@ async function monthlyTrendingProducts(req, res){
       finalMonth = month;
       finalYear = year;
     } else {
-      // When month and year are NOT provided (use current month)
+      
       startOfMonth = moment().startOf('month').toDate();
       endOfMonth = moment().endOf('month').toDate();
 
-      finalMonth = moment().format('MMMM'); // Current month name like "April"
-      finalYear = moment().format('YYYY');  // Current year like "2025"
+      finalMonth = moment().format('MMMM'); 
+      finalYear = moment().format('YYYY');  
     }
 
     console.log(`Start of Month: ${startOfMonth}`);
@@ -774,13 +757,13 @@ async function monthlyTrendingProducts(req, res){
       },
       {
         $group: {
-          _id: '$cartItems.productId._id', // Group by product id
-          totalSold: { $sum: '$cartItems.quantity' }, // Sum quantity sold
-          productTitle: { $first: '$cartItems.productId.title' }, // Get product title
+          _id: '$cartItems.productId._id', 
+          totalSold: { $sum: '$cartItems.quantity' }, 
+          productTitle: { $first: '$cartItems.productId.title' }, 
         },
       },
       {
-        $sort: { totalSold: -1 }, // Sort descending
+        $sort: { totalSold: -1 }, 
       },
       {
         $project: {

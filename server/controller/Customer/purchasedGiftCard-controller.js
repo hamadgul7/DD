@@ -17,7 +17,7 @@ async function purchaseAndSendGiftCard(req, res){
             price
         } = req.body;
 
-        // Fetch the gift card to get the code
+    
         const giftCard = await GiftCard.findById(giftCardId);
         if (!giftCard) {
             return res.status(404).json({ message: 'Gift card not found.' });
@@ -25,7 +25,7 @@ async function purchaseAndSendGiftCard(req, res){
 
         const redeemCode = crypto.randomBytes(6).toString('hex');
 
-        // Create new purchased gift card
+
         const newPurchase = new PurchasedGiftCard({
             userId,
             giftCardId,
@@ -40,7 +40,7 @@ async function purchaseAndSendGiftCard(req, res){
 
         const savedGiftCard = await newPurchase.save();
 
-        // Send email
+      
         const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 465,
@@ -114,7 +114,7 @@ async function useGiftCard(req, res){
             return res.status(400).json({ message: 'Redeem code is required.' });
         }
 
-        // Step: Find the purchased gift card by redeemCode
+   
         const purchasedCard = await PurchasedGiftCard.findOne({ redeemCode: redeemCode.trim() })
             .populate('giftCardId');
 

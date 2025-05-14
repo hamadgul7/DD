@@ -3,26 +3,23 @@ const {Achievement, Mission} = require('../../model/achievementAndMissions-model
 async function addAchievement(req, res){
     const { title, description, points, target } = req.body;
 
-    // Validate input data
     if (!title || !target) {
         return res.status(400).json({ error: 'User ID, title, and target are required.' });
     }
 
     try {
-        // Create a new milestone object
         const newAchievement = new Achievement({
             title,
             description,
             points,
             target,
-            progress: 0, // Start progress at 0
-            completed: false, // Start as incomplete
-            dateAchieved: null // Not achieved yet
+            progress: 0, 
+            completed: false, 
+            dateAchieved: null 
         });
 
         await newAchievement.save();
 
-        // Return the created achievement data
         res.status(201).json({
         message: 'Achievement milestone created successfully',
         achievement: newAchievement

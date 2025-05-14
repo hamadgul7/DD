@@ -61,7 +61,7 @@ async function login(req, res){
       const now = new Date();
 
       if (!userPoints) {
-        // First login ever
+      
         const dailyMissions = allMissions.map(m => ({
           missionId: m._id,
           title: m.title,

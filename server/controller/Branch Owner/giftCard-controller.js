@@ -145,7 +145,7 @@ async function listGiftCardsWithPagination(req, res){
 
 async function listAllGiftCards(req, res){
     try {
-        const giftCards = await GiftCard.find(); // Populate entire Business document
+        const giftCards = await GiftCard.find(); 
 
         res.status(200).json(giftCards);
     } catch (err) {

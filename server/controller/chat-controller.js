@@ -6,7 +6,7 @@ const User = require('../model/auth-model');
 async function createChat(req, res){
     const { firstId, secondId } = req.body;
     try {
-        // Check if chat already exists using the correct IDs
+
         const existingChat = await Chat.findOne({
             "members.userId": { $all: [firstId, secondId] }
         });
@@ -15,7 +15,6 @@ async function createChat(req, res){
             return res.status(200).json(existingChat);
         }
 
-        // Determine user roles and retrieve name + correct ID
         const firstRider = await Rider.findOne({ riderId: firstId });
         const firstSales = await User.findById(firstId);
 
@@ -56,7 +55,7 @@ async function createChat(req, res){
             return res.status(404).json({ message: "Second user not found" });
         }
 
-        // Create and save the new chat
+ 
         const newChat = new Chat({ members });
         const response = await newChat.save();
 

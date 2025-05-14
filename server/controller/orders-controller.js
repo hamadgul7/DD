@@ -117,13 +117,12 @@ async function addOrderDetails(req, res) {
             await order.save();
             createdOrders.push(order);
 
-           // ✅ Update gift card balance 
             if (discountData?.giftCardId && discountData?.giftCardAmount) {
                 const purchasedGiftCard = await PurchasedGiftCard.findById(discountData.giftCardId);
                 if (purchasedGiftCard) {
                     purchasedGiftCard.remainingAmount = Math.max(0, purchasedGiftCard.remainingAmount - discountData.giftCardAmount);
 
-                    // If balance becomes 0, mark the gift card as expired
+            
                     if (purchasedGiftCard.remainingAmount === 0) {
                         purchasedGiftCard.status = 'Expired';
                     }
@@ -1455,7 +1454,7 @@ async function assignOrderToRider(req, res){
     }
 
     try {
-        // Find and update the order
+    
         const order = await Order.findById(orderId);
         if (!order) {
             return res.status(404).json({ error: 'Order not found' });

@@ -37,13 +37,13 @@ async function viewCart(req, res) {
 async function addToCart(req, res) {
     const { userId, productId, quantity, selectedVariant } = req.body;
     try {
-        // Check if user exists
+
         const userExist = await User.findById(userId);
         if (!userExist) {
             return res.status(404).json({ message: "Please first login/sign up to add products in cart" });
         }
       
-        // Create and save cart item
+
         const cartProduct = new Cart({
             userId,
             productId,
@@ -53,7 +53,7 @@ async function addToCart(req, res) {
       
         await cartProduct.save();
       
-        // Delete the user's cart summary (if it exists)
+  
         await CartSummary.findOneAndDelete({ userId });
       
         res.status(201).json({
@@ -163,7 +163,7 @@ async function updateProductQuantityInCart(req, res){
 async function deleteProductFromCart(req, res) {
     const { cartId } = req.body;
     try {
-        // Delete the cart item
+ 
         const deletedCartProduct = await Cart.findByIdAndDelete(cartId);
 
         if (!deletedCartProduct) {
@@ -172,7 +172,7 @@ async function deleteProductFromCart(req, res) {
 
         const userId = deletedCartProduct.userId;
 
-        // Try deleting the user's cart summary
+    
         const deletedSummary = await CartSummary.findOneAndDelete({ userId });
 
         if (!deletedSummary) {
